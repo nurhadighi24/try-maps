@@ -49,6 +49,13 @@ const createRoutineMachineLayer = ({ selectedRoute }) => {
   instance.on("routesfound", function (e) {
     let route = e.routes[0].coordinates; // Ambil koordinat rute
     let map = instance._map; // Ambil map Leaflet
+    let totalTime = e.routes[0].summary.totalTime;
+
+    let hours = Math.floor(totalTime / 3600);
+    let minutes = Math.floor((totalTime % 3600) / 60);
+    let etaText =
+      hours > 0 ? `${hours} jam ${minutes} menit` : `${minutes} menit`;
+
     // Hapus mobil lama jika ada
     if (carMarker) {
       map.removeLayer(carMarker);
@@ -57,12 +64,14 @@ const createRoutineMachineLayer = ({ selectedRoute }) => {
     // Tambahkan ikon mobil baru ke peta
     carMarker = L.marker(route[0], { icon: carIcon }).addTo(map);
 
+    carMarker.bindPopup(`Estimasi Waktu Tiba (ETA): ${etaText}`).openPopup();
+
     let i = 0;
     function moveCar() {
       if (i < route.length) {
         carMarker.setLatLng(route[i]); // Update posisi mobil
         i++;
-        setTimeout(moveCar, 100); // Atur kecepatan pergerakan
+        setTimeout(moveCar, 200); // Atur kecepatan pergerakan
       }
     }
 
@@ -79,6 +88,7 @@ const createRoutineMachineLayer = ({ selectedRoute }) => {
       container.style.overflowY = "auto";
     }
   });
+  console.log(instance);
 
   return instance;
 };
